@@ -1,0 +1,32 @@
+services:
+  bitbucket:
+    image: atlassian/bitbucket:8-ubuntu-jdk17
+    restart: unless-stopped
+    environment:
+     - SERVER_PROXY_NAME=bitbucket.internal
+     - SERVER_PROXY_PORT=80
+     - SERVER_SCHEME=http
+    links:
+      - database
+    volumes:
+      - bitbucket-data:/var/atlassian/application-data/bitbucket
+  database:
+    image: postgres:9.4
+    restart: unless-stopped
+    volumes:
+      - database-data:/var/lib/postgresql/data
+  nginx:
+    image: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    links:
+      - bitbucket
+    volumes:
+    - ./:/src
+    command: ./src/scripts/run_nginx.sh
+    environment:
+    - DOMAIN
+volumes:
+  bitbucket-data:
+  database-data:

@@ -1,0 +1,40 @@
+services:
+  confluence:
+    image: atlassian/confluence:8.9.5-ubuntu-jdk17
+    expose:
+      - 8090
+    environment:
+      - VIRTUAL_HOST=${BASE_FQDN}
+      - VIRTUAL_PATH=/confluence
+      - VIRTUAL_PORT=8090
+      - CERT_NAME=default
+      - ATL_PROXY_NAME=${BASE_FQDN}
+      - ATL_PROXY_PORT=443
+      - ATL_TOMCAT_SCHEME=https
+      - ATL_TOMCAT_SECURE=false
+      - ATL_TOMCAT_CONTEXTPATH=confluence
+    restart: unless-stopped
+    links:
+      - database
+    volumes:
+      - confluence-data:/var/atlassian/confluence
+  database:
+    image: postgres:9.4
+    restart: unless-stopped
+    volumes:
+      - database-data:/var/lib/postgresql/data
+  nginx:
+    image: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    links:
+      - confluence
+    volumes:
+    - ./:/src
+    command: ./src/scripts/run_nginx.sh
+    environment:
+    - DOMAIN
+volumes: 
+  confluence-data: 
+  database-data:
