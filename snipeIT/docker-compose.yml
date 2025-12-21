@@ -1,0 +1,40 @@
+# Compose file for production.
+
+volumes:
+  db_data:
+  storage:
+
+services:
+  snipe_web:
+    image: tedleyem/snipe-it:latest
+    container_name: snipeit
+    restart: unless-stopped
+    volumes:
+      - storage:/var/lib/snipeit
+    ports:
+      - "${APP_PORT:-8000}:80"
+    depends_on:
+      snipe_db:
+        condition: service_healthy
+        restart: true
+    env_file:
+      - .env
+
+  snipe_db:
+    image: mariadb:11.4.7
+    container_name: snipe_db
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./scripts/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    healthcheck:
+      # https://mariadb.com/kb/en/using-healthcheck-sh/#compose-file-example
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
