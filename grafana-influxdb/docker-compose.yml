@@ -13,25 +13,28 @@ services:
     container_name: chronograf
     ports:
       - '127.0.0.1:8888:8888'
-#    volumes:
-#      - data/chronograf:/var/lib/chronograf
+    volumes:
+      - chronograf-storage:/var/lib/chronograf
+      # - data/chronograf:/var/lib/chronograf
     depends_on:
       - influxdb
     env_file:
       - .env 
   grafana:
     image: grafana/grafana:latest
-    container_name: grafana
+    container_name: grafana-inf
     ports:
       - '3000:3000'
     volumes:
-      - ./data/grafana:/var/lib/grafana
-      - ./grafana-provisioning/:/etc/grafana/provisioning
+      - grafana-storage:/var/lib/grafana
+      #- ./data/grafana:/var/lib/grafana
+      - ./grafana/:/etc/grafana/provisioning
     depends_on:
       - influxdb
     env_file:
       - .env 
-#volumes:
-#  influxdb-storage:
-#  chronograf-storage:
-#  grafana-storage:
+
+volumes:
+  influxdb-storage:
+  chronograf-storage:
+  grafana-storage:
