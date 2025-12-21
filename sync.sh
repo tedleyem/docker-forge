@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Array of Docker image names in repo/image format
-docker_images=("manios/nagios" "snipe/snipe-it" "teampasswordmanager/teampasswordmanager")
+docker_images=("snipe/snipe-it" "teampasswordmanager/teampasswordmanager")
 
 # Docker Hub username (replace this with your actual username)
 docker_username="tedleyem"
