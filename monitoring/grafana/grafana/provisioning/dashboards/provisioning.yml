@@ -1,0 +1,24 @@
+apiVersion: 1
+
+providers:
+  - name: 'Infrastructure Dashboards'
+    orgId: 1
+    folder: 'Infrastructure'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards/infrastructure
+      jsonData:
+        graph_tooltip: 1
+
+  - name: 'Applications Dashboards'
+    orgId: 1
+    folder: 'Core Applications'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards/applications
+      jsonData:
+        graph_tooltip: 2
