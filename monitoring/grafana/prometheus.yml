@@ -9,7 +9,11 @@ scrape_configs:
   - job_name: "docker-containers"
     static_configs:
       - targets: ["cadvisor:8080"]
-
+  # Added local node metrics
   - job_name: 'laptop-metrics'
     static_configs:
       - targets: ['node-exporter:9100']
+  # Added CIS benchmark metrics 
+  - job_name: 'scapinoculars'
+    static_configs:
+      - targets: ['localhost:2112']
