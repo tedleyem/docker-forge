@@ -1,4 +1,4 @@
-FROM debian:trixie-slim
+FROM debian:trixie-slim 
 
 # Igore pinning package versions with hadolint
 # hadolint ignore=DL3008
