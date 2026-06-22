@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 LABEL maintainer="Tedley Meralus <tedley@meralus.dev>"
 
 ENV NAGIOS_HOME            /opt/nagios
@@ -26,7 +26,11 @@ ENV NRPE_BRANCH            nrpe-3.2.1
 RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set-selections  && \
     echo postfix postfix/mynetworks string "127.0.0.0/8" | debconf-set-selections            && \
     echo postfix postfix/mailname string ${NAGIOS_FQDN} | debconf-set-selections             && \
-    printf "Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: noble noble-updates noble-backports\nComponents: main restricted universe multiverse\nSigned-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n\nTypes: deb\nURIs: http://security.ubuntu.com/ubuntu/\nSuites: noble-security\nComponents: main restricted universe multiverse\nSigned-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n" > /etc/apt/sources.list.d/ubuntu.sources && \
+    rm -f /etc/apt/sources.list.d/ubuntu.sources && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse" > /etc/apt/sources.list.d/legacy.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list.d/legacy.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list.d/legacy.list && \
+    echo "deb http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list.d/legacy.list && \
     apt-get update && apt-get install -y    \
         apache2                             \
         apache2-utils                       \
@@ -168,7 +172,7 @@ RUN cd /tmp                                                          && \
     cd /tmp && rm -Rf nagiosgraph
 
 RUN cd /opt                                                                         && \
-    pip3 install --break-system-packages pymssql                                    && \
+    pip3 install pymssql                                                            && \
     git clone https://github.com/willixix/naglio-plugins.git     WL-Nagios-Plugins  && \
     git clone https://github.com/justintime/nagios-plugins.git   JE-Nagios-Plugins  && \
     git clone https://github.com/tmeralus/nagios-plugins.git  TM-Nagios-Plugins  && \
@@ -201,63 +205,4 @@ RUN mkdir -p -m 0755 /usr/share/snmp/mibs                     && \
     touch /usr/share/snmp/mibs/.foo                           && \
     ln -s /usr/share/snmp/mibs ${NAGIOS_HOME}/libexec/mibs    && \
     ln -s ${NAGIOS_HOME}/bin/nagios /usr/local/bin/nagios     && \
-    download-mibs && echo "mibs +ALL" > /etc/snmp/snmp.conf
-
-RUN sed -i 's,/bin/mail,/usr/bin/mail,' ${NAGIOS_HOME}/etc/objects/commands.cfg  && \
-    sed -i 's,/usr/usr,/usr,'           ${NAGIOS_HOME}/etc/objects/commands.cfg
-
-RUN cp /etc/services /var/spool/postfix/etc/  && \
-    echo "smtp_address_preference = ipv4" >> /etc/postfix/main.cf
-
-RUN rm -rf /etc/rsyslog.d /etc/rsyslog.conf
-
-RUN rm -rf /etc/sv/getty-5
-
-ADD overlay /
-
-RUN echo "use_timezone=${NAGIOS_TIMEZONE}" >> ${NAGIOS_HOME}/etc/nagios.cfg
-
-# Copy example config in-case the user has started with empty var or etc
-
-RUN mkdir -p /orig/var && mkdir -p /orig/etc  && \
-    cp -Rp ${NAGIOS_HOME}/var/* /orig/var/       && \
-    cp -Rp ${NAGIOS_HOME}/etc/* /orig/etc/
-
-RUN a2enmod request         && \
-    a2enmod session         && \
-    a2enmod session_cookie  && \
-    a2enmod session_crypto  && \
-    a2enmod auth_form       
-
-RUN chmod +x /usr/local/bin/start_nagios        && \
-    chmod +x /etc/sv/apache/run                 && \
-    chmod +x /etc/sv/nagios/run                 && \
-    chmod +x /etc/sv/postfix/run                 && \
-    chmod +x /etc/sv/rsyslog/run                 && \
-    chmod +x /opt/nagiosgraph/etc/fix-nagiosgraph-multiple-selection.sh
-
-RUN cd /opt/nagiosgraph/etc && \
-    sh fix-nagiosgraph-multiple-selection.sh
-
-RUN rm /opt/nagiosgraph/etc/fix-nagiosgraph-multiple-selection.sh
-
-# enable all runit services
-RUN ln -s /etc/sv/* /etc/service
-
-ENV APACHE_LOCK_DIR /var/run
-ENV APACHE_LOG_DIR /var/log/apache2
-
-#Set ServerName and timezone for Apache
-RUN echo "ServerName ${NAGIOS_FQDN}" > /etc/apache2/conf-available/servername.conf    && \
-    echo "PassEnv TZ" > /etc/apache2/conf-available/timezone.conf            && \
-    ln -s /etc/apache2/conf-available/servername.conf /etc/apache2/conf-enabled/servername.conf    && \
-    ln -s /etc/apache2/conf-available/timezone.conf /etc/apache2/conf-enabled/timezone.conf
-
-# Add config files from repo
-COPY overlay/opt/nagios/etc/objects/*.cfg /opt/nagios/etc/objects/
-
-EXPOSE 80 5666
-
-VOLUME "${NAGIOS_HOME}/var" "${NAGIOS_HOME}/etc" "/var/log/apache2" "/opt/Custom-Nagios-Plugins" "/opt/nagiosgraph/var" "/opt/nagiosgraph/etc"
-
-CMD [ "/usr/local/bin/start_nagios" ]
+    download-mibs && echo "mibs +ALL" > /etc/snmp
