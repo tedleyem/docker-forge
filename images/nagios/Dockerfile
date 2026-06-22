@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 LABEL maintainer="Tedley Meralus <tedley@meralus.dev>"
 
 ENV NAGIOS_HOME            /opt/nagios
@@ -26,7 +26,7 @@ ENV NRPE_BRANCH            nrpe-3.2.1
 RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set-selections  && \
     echo postfix postfix/mynetworks string "127.0.0.0/8" | debconf-set-selections            && \
     echo postfix postfix/mailname string ${NAGIOS_FQDN} | debconf-set-selections             && \
-    sed -i 's/main/main restricted universe multiverse/g' /etc/apt/sources.list              && \
+    sed -i 's/Components: main restricted/Components: main restricted universe multiverse/g' /etc/apt/sources.list.d/ubuntu.sources && \
     apt-get update && apt-get install -y    \
         apache2                             \
         apache2-utils                       \
@@ -37,7 +37,7 @@ RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set
         bsd-mailx                           \
         build-essential                     \
         dnsutils                            \
-        docker                              \
+        docker.io                           \
         fping                               \
         gettext                             \
         git                                 \
@@ -65,7 +65,7 @@ RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set
         libswitch-perl                      \
         libwww-perl                         \
         m4                                  \
-        netcat                              \
+        netcat-openbsd                      \
         nagios-plugins                      \
         nagios-plugins-basic                \
         nagios-plugins-common               \
@@ -87,11 +87,11 @@ RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set
                                                 && \
     apt-get clean && rm -Rf /var/lib/apt/lists/*
 
-RUN ( egrep -i "^${NAGIOS_GROUP}"    /etc/group || groupadd $NAGIOS_GROUP    )                         && \
-    ( egrep -i "^${NAGIOS_CMDGROUP}" /etc/group || groupadd $NAGIOS_CMDGROUP )
+RUN ( grep -i "^${NAGIOS_GROUP}:"    /etc/group || groupadd $NAGIOS_GROUP    )                         && \
+    ( grep -i "^${NAGIOS_CMDGROUP}:" /etc/group || groupadd $NAGIOS_CMDGROUP )
 RUN ( id -u $NAGIOS_USER    || useradd --system -d $NAGIOS_HOME -g $NAGIOS_GROUP    $NAGIOS_USER    )  && \
     ( id -u $NAGIOS_CMDUSER || useradd --system -d $NAGIOS_HOME -g $NAGIOS_CMDGROUP $NAGIOS_CMDUSER )
-RUN ( id -u $NAGIOS_USER    || usermod --system $DOCKER_GROUP $NAGIOS_USER    )
+RUN ( id -u $NAGIOS_USER    || usermod -aG $DOCKER_GROUP $NAGIOS_USER    )
 
 RUN cd /tmp                                           && \
     git clone https://github.com/multiplay/qstat.git  && \
@@ -168,16 +168,16 @@ RUN cd /tmp                                                          && \
     cd /tmp && rm -Rf nagiosgraph
 
 RUN cd /opt                                                                         && \
-    pip3 install pymssql                                                             && \
+    pip3 install --break-system-packages pymssql                                    && \
     git clone https://github.com/willixix/naglio-plugins.git     WL-Nagios-Plugins  && \
     git clone https://github.com/justintime/nagios-plugins.git   JE-Nagios-Plugins  && \
     git clone https://github.com/tmeralus/nagios-plugins.git  TM-Nagios-Plugins  && \
     git clone https://github.com/tmeralus/check_docker.git    Nagios-Docker-Plugins && \
     git clone https://github.com/nagiosenterprises/check_mssql_collection.git   nagios-mssql  && \
-    chmod +x /opt/WL-Nagios-Plugins/check*                                          && \
-    chmod +x /opt/JE-Nagios-Plugins/check*                                          && \
-    chmod +x /opt/TM-Nagios-Plugins/check*                                          && \
-    chmod +x /opt/Nagios-Docker-Plugins/check*                                          && \
+    chmod +x /opt/WL-Nagios-Plugins/check* && \
+    chmod +x /opt/JE-Nagios-Plugins/check* && \
+    chmod +x /opt/TM-Nagios-Plugins/check* && \
+    chmod +x /opt/Nagios-Docker-Plugins/check* && \
     cp /opt/JE-Nagios-Plugins/check_mem/check_mem.pl ${NAGIOS_HOME}/libexec/                            && \
     cp /opt/nagios-mssql/check_mssql_database.py ${NAGIOS_HOME}/libexec/                                && \
     cp /opt/nagios-mssql/check_mssql_server.py ${NAGIOS_HOME}/libexec/                                  && \
@@ -223,11 +223,11 @@ RUN mkdir -p /orig/var && mkdir -p /orig/etc  && \
     cp -Rp ${NAGIOS_HOME}/var/* /orig/var/       && \
     cp -Rp ${NAGIOS_HOME}/etc/* /orig/etc/
 
-RUN a2enmod session         && \
+RUN a2enmod request         && \
+    a2enmod session         && \
     a2enmod session_cookie  && \
     a2enmod session_crypto  && \
-    a2enmod auth_form       && \
-    a2enmod request
+    a2enmod auth_form       
 
 RUN chmod +x /usr/local/bin/start_nagios        && \
     chmod +x /etc/sv/apache/run                 && \
@@ -261,7 +261,3 @@ EXPOSE 80 5666
 VOLUME "${NAGIOS_HOME}/var" "${NAGIOS_HOME}/etc" "/var/log/apache2" "/opt/Custom-Nagios-Plugins" "/opt/nagiosgraph/var" "/opt/nagiosgraph/etc"
 
 CMD [ "/usr/local/bin/start_nagios" ]
-
-# will not run until hosts file is added
-# /opt/nagios/etc/objects/hosts.cfg
-# update hosts inside container. add it from the git repo
