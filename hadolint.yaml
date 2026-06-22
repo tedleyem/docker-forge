@@ -1,0 +1,6 @@
+# .hadolint.yaml
+# Ignore code style rules (DL3000+) and focus on basic syntax/critical issues
+ignored:
+  - DL3008 # Pin versions in apt-get install
+  - DL3009 # Delete the apt-get lists after installing
+  - DL3015 # Avoid additional packages (no-install-recommends)
