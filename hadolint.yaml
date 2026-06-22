@@ -10,3 +10,5 @@ ignored:
   - DL3059 # Multiple consecutive RUN instructions
   - SC2116 # Useless echo
   - SC2174 # When used with -p, -m only applies to the deepest directory
+  - SC2196 # egrep is non-standard and deprecated
+  - DL3047 # Avoid use of wget without progress bar
