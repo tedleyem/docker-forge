@@ -1,5 +1,5 @@
 FROM ubuntu:20.04
-MAINTAINER Tedley Meralus <tmeralus@gmail.com>
+LABEL maintainer="Tedley Meralus <tedley@meralus.dev>"
 
 ENV NAGIOS_HOME            /opt/nagios
 ENV NAGIOS_GRAPH_HOME      /opt/nagiosgraph/var/rrd
@@ -74,9 +74,8 @@ RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set
         php-cli                             \
         php-gd                              \
         postfix                             \
-        python-pip                          \
-        python                              \
         python3                             \
+        python3-pip                          \
         rsyslog                             \
         runit                               \
         smbclient                           \
@@ -168,7 +167,7 @@ RUN cd /tmp                                                          && \
     cd /tmp && rm -Rf nagiosgraph
 
 RUN cd /opt                                                                         && \
-    pip install pymssql                                                             && \
+    pip3 install pymssql                                                             && \
     git clone https://github.com/willixix/naglio-plugins.git     WL-Nagios-Plugins  && \
     git clone https://github.com/justintime/nagios-plugins.git   JE-Nagios-Plugins  && \
     git clone https://github.com/tmeralus/nagios-plugins.git  TM-Nagios-Plugins  && \
@@ -254,8 +253,7 @@ RUN echo "ServerName ${NAGIOS_FQDN}" > /etc/apache2/conf-available/servername.co
     ln -s /etc/apache2/conf-available/timezone.conf /etc/apache2/conf-enabled/timezone.conf
 
 # Add config files from repo
-#COPY overlay/opt/nagios/etc/objects/localhost.cfg usr/local/nagios/etc/objects/localhost.cfg
-COPY overlay/opt/nagios/etc/objects/*.cfg usr/local/nagios/etc/objects/
+COPY overlay/opt/nagios/etc/objects/*.cfg /opt/nagios/etc/objects/
 
 EXPOSE 80 5666
 
@@ -264,5 +262,5 @@ VOLUME "${NAGIOS_HOME}/var" "${NAGIOS_HOME}/etc" "/var/log/apache2" "/opt/Custom
 CMD [ "/usr/local/bin/start_nagios" ]
 
 # will not run until hosts file is added
-# /usr/local/nagios/etc/objects/hosts.cfg
+# /opt/nagios/etc/objects/hosts.cfg
 # update hosts inside container. add it from the git repo
