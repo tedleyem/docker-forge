@@ -26,6 +26,7 @@ ENV NRPE_BRANCH            nrpe-3.2.1
 RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set-selections  && \
     echo postfix postfix/mynetworks string "127.0.0.0/8" | debconf-set-selections            && \
     echo postfix postfix/mailname string ${NAGIOS_FQDN} | debconf-set-selections             && \
+    sed -i 's/main/main restricted universe multiverse/g' /etc/apt/sources.list              && \
     apt-get update && apt-get install -y    \
         apache2                             \
         apache2-utils                       \
@@ -75,7 +76,7 @@ RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set
         php-gd                              \
         postfix                             \
         python3                             \
-        python3-pip                          \
+        python3-pip                         \
         rsyslog                             \
         runit                               \
         smbclient                           \
