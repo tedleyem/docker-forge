@@ -13,12 +13,3 @@ The forge is organized by application stack:
 *   **`/security`**: Wazuh-dev and Snipe-IT for asset and threat management.
 *   **`/infrastructure`**: Foreman and OS Ticket for life-cycle and support.
 *   **`/gaming`**: Dedicated ARK server configurations.
-
----
-
-## 🚀 Deployment Standard
-Each service directory follows a standardized structure:
-1. `docker-compose.yml`: Optimized for resource limits and logging.
-2. `.env.example`: Template for environment variables (secrets excluded).
-3. `config/`: Persistent volume mount points.
-

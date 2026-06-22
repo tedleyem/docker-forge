@@ -1,0 +1,70 @@
+name: Docker Forge CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Detect Image Changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            debian-vim-rsync: 'images/debian-vim-rsync/**'
+            nagios: 'images/nagios/**'
+            
+  validate-and-publish:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.images != '[]' && needs.detect-changes.outputs.images != '' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: ${{ fromJSON(needs.detect-changes.outputs.images) }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: images/${{ matrix.image }}/Dockerfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Load (PR validation)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./images/${{ matrix.image }}
+          push: false
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.image }}:latest
+
+      - name: Build and Push (Main branch)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./images/${{ matrix.image }}
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.image }}:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.image }}:${{ github.sha }}
