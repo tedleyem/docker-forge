@@ -1,6 +1,6 @@
 FROM debian:trixie-slim 
 
-RUN apt update && apt-get install -y --no-install-recommends \
+RUN apt update && apt install -y --no-install-recommends \
     openssh-client \
     rsync \
     vim \
