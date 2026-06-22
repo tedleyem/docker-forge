@@ -22,8 +22,10 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: |
-            debian-vim-rsync: 'images/debian-vim-rsync/**'
-            nagios: 'images/nagios/**'
+            debian-vim-rsync: 'images/debian-vim-rsync/*'
+            nagios: 'images/nagios/*'
+            python-quote-generator: 'images/python-quote-generator/*'
+            python-short-url: 'images/python-short-url/*'
             
   validate-and-publish:
     needs: detect-changes
