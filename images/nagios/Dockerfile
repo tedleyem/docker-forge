@@ -26,64 +26,64 @@ ENV NRPE_BRANCH            nrpe-3.2.1
 RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set-selections  && \
     echo postfix postfix/mynetworks string "127.0.0.0/8" | debconf-set-selections            && \
     echo postfix postfix/mailname string ${NAGIOS_FQDN} | debconf-set-selections             && \
-    sed -i 's/Components: main restricted/Components: main restricted universe multiverse/g' /etc/apt/sources.list.d/ubuntu.sources && \
+    printf "Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: noble noble-updates noble-backports\nComponents: main restricted universe multiverse\nSigned-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n\nTypes: deb\nURIs: http://security.ubuntu.com/ubuntu/\nSuites: noble-security\nComponents: main restricted universe multiverse\nSigned-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n" > /etc/apt/sources.list.d/ubuntu.sources && \
     apt-get update && apt-get install -y    \
         apache2                             \
         apache2-utils                       \
         apt-utils                           \
         autoconf                            \
         automake                            \
-        bc                                  \
-        bsd-mailx                           \
-        build-essential                     \
-        dnsutils                            \
-        docker.io                           \
-        fping                               \
-        gettext                             \
-        git                                 \
-        gperf                               \
-        iputils-ping                        \
-        jq                                  \
-        libapache2-mod-php                  \
-        libcache-memcached-perl             \
-        libcgi-pm-perl                      \
-        libdbd-mysql-perl                   \
-        libdbi-dev                          \
-        libdbi-perl                         \
-        libjson-perl                        \
-        libldap2-dev                        \
-        libmysqlclient-dev                  \
-        libnagios-object-perl               \
-        libmonitoring-availability-perl     \
-        libnet-snmp-perl                    \
-        libnet-tftp-perl                    \
-        libnet-xmpp-perl                    \
-        libpq-dev                           \
-        libredis-perl                       \
-        librrds-perl                        \
-        libssl-dev                          \
-        libswitch-perl                      \
-        libwww-perl                         \
-        m4                                  \
-        netcat-openbsd                      \
-        nagios-plugins                      \
-        nagios-plugins-basic                \
-        nagios-plugins-common               \
-        nagios-plugins-contrib              \
-        nagios-plugins-standard             \
-        parallel                            \
-        php-cli                             \
-        php-gd                              \
-        postfix                             \
-        python3                             \
-        python3-pip                         \
-        rsyslog                             \
-        runit                               \
-        smbclient                           \
-        snmp                                \
-        snmpd                               \
-        snmp-mibs-downloader                \
-        unzip                               \
+        bc          \
+        bsd-mailx   \
+        build-essential \
+        dnsutils    \
+        docker.io   \
+        fping       \
+        gettext     \
+        git         \
+        gperf       \
+        iputils-ping \
+        jq          \
+        libapache2-mod-php \
+        libcache-memcached-perl \
+        libcgi-pm-perl \
+        libdbd-mysql-perl \
+        libdbi-dev  \
+        libdbi-perl \
+        libjson-perl \
+        libldap2-dev \
+        libmysqlclient-dev \
+        libnagios-object-perl \
+        libmonitoring-availability-perl \
+        libnet-snmp-perl \
+        libnet-tftp-perl \
+        libnet-xmpp-perl \
+        libpq-dev   \
+        libredis-perl \
+        librrds-perl \
+        libssl-dev  \
+        libswitch-perl \
+        libwww-perl \
+        m4          \
+        netcat-openbsd \
+        nagios-plugins \
+        nagios-plugins-basic \
+        nagios-plugins-common \
+        nagios-plugins-contrib \
+        nagios-plugins-standard \
+        parallel    \
+        php-cli     \
+        php-gd      \
+        postfix     \
+        python3     \
+        python3-pip \
+        rsyslog     \
+        runit       \
+        smbclient   \
+        snmp        \
+        snmpd       \
+        snmp-mibs-downloader \
+        unzip       \
                                                 && \
     apt-get clean && rm -Rf /var/lib/apt/lists/*
 
