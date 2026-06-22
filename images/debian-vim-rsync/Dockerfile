@@ -1,7 +1,8 @@
 FROM debian:trixie-slim 
 
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends \
+# Igore pinning package versions with hadolint
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-client \
     rsync \
     vim \
