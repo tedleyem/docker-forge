@@ -23,7 +23,6 @@ ENV NAGIOS_BRANCH          nagios-4.4.6
 ENV NAGIOS_PLUGINS_BRANCH  release-2.2.1
 ENV NRPE_BRANCH            nrpe-3.2.1
 
-
 RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set-selections  && \
     echo postfix postfix/mynetworks string "127.0.0.0/8" | debconf-set-selections            && \
     echo postfix postfix/mailname string ${NAGIOS_FQDN} | debconf-set-selections             && \

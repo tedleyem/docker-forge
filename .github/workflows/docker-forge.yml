@@ -25,7 +25,7 @@ jobs:
             debian-vim-rsync: 'images/debian-vim-rsync/*'
             nagios: 'images/nagios/*'
             python-quote-generator: 'images/python-quote-generator/*'
-            python-short-url: 'images/python-short-url/*'
+            python-shorturl: 'images/python-shorturl/*'
             
   validate-and-publish:
     needs: detect-changes
