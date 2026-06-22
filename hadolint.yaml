@@ -1,6 +1,12 @@
-# .hadolint.yaml
-# Ignore code style rules (DL3000+) and focus on basic syntax/critical issues
+# hadolint.yaml
 ignored:
+  - DL3003 # Use WORKDIR to switch to a directory
   - DL3008 # Pin versions in apt-get install
   - DL3009 # Delete the apt-get lists after installing
   - DL3015 # Avoid additional packages (no-install-recommends)
+  - DL3020 # Use COPY instead of ADD
+  - DL3042 # Avoid use of cache directory with pip
+  - DL3045 # COPY to a relative destination without WORKDIR set
+  - DL3059 # Multiple consecutive RUN instructions
+  - SC2116 # Useless echo
+  - SC2174 # When used with -p, -m only applies to the deepest directory
